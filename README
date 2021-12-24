@@ -1,0 +1,19 @@
+
+Source code for prior coding exercises can be found in MinGW / Git Bash
+under ~/OneDrive/Documents/Misc/GitHub.
+
+Pushing a new repo to GitHub
+* cd to repo home folder
+* git init
+* commit changes
+
+
+The code under ~/NotesApp/src/main/java/server is from an
+earlier, aborted version of the To-Do app.
+
+There are multiple locations for the NCAA code:
+* ~/OneDrive/Documents/Misc/GitHub/Scripts/NCAA (under source control but last update was 2013)
+* ~/OneDrive/Documents/Misc/cygwin64/home/Kevin/Scripts/NCAA (last update was 2017)
+* ~/OneDrive/Documents/Misc/cygwin64/home/Kevin/NCAA_OLD (delete?)
+* ~/OneDrive/Documents/Misc/GitHub/Scripts/NCAA.OLD (delete?)
+* ~/OneDrive/Documents/Misc/NCAA (delete?)
