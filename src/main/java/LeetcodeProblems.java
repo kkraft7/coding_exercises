@@ -156,6 +156,28 @@ public class LeetcodeProblems {
         }
     }
 
+    /*
+    3. Longest Substring Without Repeating Characters
+    Given a string s, find the length of the longest substring without repeating characters.
+    Examples: abcabcbb => 3, bbbbb => 1, pwwkew => 3
+    */
+    public static int lengthOfLongestSubstring(String s) {
+        int startIndex = 0;
+        int endIndex = 0;
+        int longestLength = 0;
+        while (endIndex < s.length()) {
+            int duplicateIndex = s.lastIndexOf(s.substring(startIndex, endIndex), s.charAt(endIndex));
+            if (duplicateIndex == -1) {
+                endIndex++;
+            }
+            else if (endIndex - startIndex + 1 > longestLength) {
+                longestLength = endIndex - startIndex + 1;
+                startIndex = endIndex = duplicateIndex + 1;
+            }
+        }
+        return longestLength;
+    }
+
     // ToDo: Check in updates to GitHub
     public static void main(String[] argv) throws Exception {
 

@@ -6,7 +6,7 @@ Pushing a new repo to GitHub
 * cd to repo home folder
 * git init
 * commit changes
-* Creating a new remote repo locally:
+* Creating a new remote repo locally (with desired default branch):
   - git remote add origin https://github.com/kkraft7/coding_exercises.git
   - Note this is not necessary if you have already created the repo in GitHub
 * Creating a new remote repo in GitHub: GitHub -> Repositories -> New
@@ -16,15 +16,14 @@ Pushing a new repo to GitHub
 * git push origin master
   - May need to create a new access token to have push permissions
   - GitHub -> Profile -> Settings -> Developer settings -> Personal access tokens
+  - git push https://TOKEN@github.com/kkraft7/coding_exercises.git
 
 The code under ~/NotesApp/src/main/java/server is from an
 earlier, aborted version of the To-Do app.
 
 There are multiple locations for the NCAA code:
-* C:\Users\kevin\OneDrive\Documents\Kids and Family\Kevin\NCAA (up to date, but need to sync with source control)
+* C:/Users/kevin/git/Scripts/NCAA (up to date and under source control)
+* C:/Users/kevin/OneDrive/Documents/Kids and Family/Kevin/NCAA (up to date, but need to sync with source control)
+  - Backed up to Google Drive
 * ~/OneDrive/Documents/Misc/GitHub/Scripts/NCAA (under source control but last update was 2013)
 * ~/OneDrive/Documents/Misc/cygwin64/home/Kevin/Scripts/NCAA (last update was 2017)
-* C:\Users\kevin\OneDrive\Documents\Kids and Family\Kevin\NCAA_old (delete?)
-* ~/OneDrive/Documents/Misc/cygwin64/home/Kevin/NCAA_OLD (delete?)
-* ~/OneDrive/Documents/Misc/GitHub/Scripts/NCAA.OLD (delete?)
-* ~/OneDrive/Documents/Misc/NCAA (delete?)
