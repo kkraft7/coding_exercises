@@ -9,9 +9,11 @@ Pushing a new repo to GitHub
 * Creating a new remote repo locally (with desired default branch):
   - git remote add origin https://github.com/kkraft7/coding_exercises.git
   - Note this is not necessary if you have already created the repo in GitHub
+  - I found that I had to create the repo in GitHub before I could push there
 * Creating a new remote repo in GitHub: GitHub -> Repositories -> New
 * Use an existing remote repo:
   - git remote set-url origin https://github.com/kkraft7/coding_exercises.git (for example)
+  - If this fails with "fatal: No such remote 'origin'" try "git remote add origin"
   - To find your remote repo URL: GitHub -> Repo -> Code (green button) ->
 * git push origin master
   - May need to create a new access token to have push permissions

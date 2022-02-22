@@ -27,6 +27,7 @@ public abstract class TestRunner<T> {
 
     abstract List<T> parseNextLine(String inputLine);
 
+    // So far the HackerRank tests take in a List and return an int as the answer
     abstract int runTest(List<T> testData);
 
     // ToDo: Pass test-specific runner function instead of defining runTest()?
