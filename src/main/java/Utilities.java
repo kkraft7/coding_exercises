@@ -21,7 +21,7 @@ public class Utilities {
 
     public static <T> String arrayToString(T[] array) { return Arrays.toString(array); }
 
-    // ToDo: Rewrite to take N arrays
+    // ToDo: Rewrite to take N arrays (use varargs)
     public static <T> T[] combineArrays(T[] a1, T[] a2) { return ArrayUtils.addAll(a1, a2); }
 
     public static SecureRandom getSecureRandom() {
@@ -41,6 +41,9 @@ public class Utilities {
         }
         return null;    // Why is return value required here?
     }
+
+    // ToDo: Define base TestData class
+    // abstract List<TestData> readTestData(fileName)
 
     // Try and combine all these in a switch/case statement?
     // public static <T> List<T> parseListFromString(String lineToParse) {

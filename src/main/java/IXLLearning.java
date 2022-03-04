@@ -11,33 +11,40 @@ public class IXLLearning {
     * Also do not store duplicate values
     * Note that List removal requires shuffling of the elements to keep the
       List memory contiguous. This means that removing an arbitrary element
-      from a list as a O(N) operation, but removing the element at the *end*
+      from a list is a O(N) operation, but removing the element at the *end*
       of the List is O(1).
     */
-    // static?
     class EfficientDataStorage {
-        Map<Integer, Integer> data;
+        // Note that these two data structures must be kept in sync
+        Map<Integer, Integer> data; // Maps the list value to it's location in the list
         List<Integer> randomData;
 
         public EfficientDataStorage() {
             data = new HashMap<>();
             randomData = new ArrayList<>();
-            // rand = new SecureRandom();
         }
 
+        // Always add new items at the end of the List
         public void insertData(Integer i) {
             if (!data.containsKey(i)) {
                 randomData.add(i);
+                // The map value points to the list index containing i
                 data.put(i, randomData.size() - 1);
             }
         }
 
+        // Always remove from the end to keep the List memory contiguous
         public Integer removeData(Integer i) {
             if (data.containsKey(i)) {
+                // Save last List item
                 Integer temp = randomData.remove(randomData.size() - 1);
+                // Move last list item to overwrite removed item
                 randomData.add(data.get(i), temp);
+                // Save new location of last List item
                 data.put(temp, data.get(i));
+                // Remove entry for removed item
                 data.remove(i);
+                return i;
             }
             return null;
         }

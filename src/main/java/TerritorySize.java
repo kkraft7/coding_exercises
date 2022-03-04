@@ -1,68 +1,36 @@
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import static org.junit.Assert.*;
 
 /*
-For Guidewire CASE (services) team coding test.
-ToDo: Is this still true? Represents a matrix of size NxN as an array of size N^2
+** For the Guidewire CASE (services) team coding challenge.
+**
+** Given an NxM matrix of integers (from 0-9 in this case), a territory
+** is a group of idenitcal integer values, connected vertically or horizontally
+** (but not diagonally). Return the maximum territory size.
 */
 public class TerritorySize {
-    // Try recursion starting at 0 instead of looping
-    public static int calculateLargestTerritory(TerritoryData data) {
-        int largestTerritory = 0;
-        // ToDo: Shouldn't need to loop for the recursive solution?
-        for (int i = 0; i < data.matrix.length; i++) {
-            for (int j = 0; j < data.matrix[i].length; j++) {
-                int territory = calculateTerritoryRecursive(data.matrix[i][j], i, j, data.matrix);
-                if (territory > largestTerritory) {
-                    largestTerritory = territory;
-                    System.out.println("Setting largest territory to " + largestTerritory + " for value "
-                            + data.matrix[i][j]);
-                }
-            }
-        }
-        return largestTerritory;
-    }
 
-/*
-    public static int calculateLargestTerritory(int[][] matrix) {
-        // int [][] matrix = vectorToMatrix(A);
-        int largestTerritory = 0;
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix.length; j++) {
-                int territory = calculateTerritory(matrix[i][j], i, j, matrix);
-                if (territory > largestTerritory) {
-                    largestTerritory = territory;
-                    System.out.println("Setting largest territory to " + largestTerritory + " for value " + matrix[i][j]);
-                }
-            }
-        }
-        return largestTerritory;
-    }
-*/
+    // Position of index/square relative to current index
+    public enum Position {
+        LAST_ROW, LAST_COL, NEXT_ROW, NEXT_COL;
 
-    // Use memoization (or similar) to skip squares that have already been seen
-    public static int calculateTerritoryRecursive(int value, int i, int j, int [][] matrix) {
-        if (i >= 0 && i < matrix.length && j >= 0 && j < matrix.length && value == matrix[i][j]) {
-            // Looks like this is double (or triple etc.) counting
-            return 1
-                    + calculateTerritoryRecursive(value, i + 1, j, matrix)
-                    // + calculateTerritory(value, i - 1, j, matrix)
-                    + calculateTerritoryRecursive(value, i, j + 1, matrix)
-                    // + calculateTerritory(value, i + 1, j + 1, matrix);
-                    // Adding this line causes a StackOverflowError
-                    + calculateTerritoryRecursive(value, i, j - 1, matrix);
-        }
-        else {
-            // Looks like this version never gets here
-            return 0;
+        public String getLookupIndex(int i, int j) {
+            switch (this) {
+                case LAST_COL: return i + "," + (j - 1);
+                case NEXT_COL: return i + "," + (j + 1);
+                case LAST_ROW: return (i - 1) + "," + j;
+                case NEXT_ROW: return (i + 1) + "," + j;
+            }
+            return "";
         }
     }
 
     static class TerritoryData {  // Test data class
-        final int value;
-        final int maxSize;
-        final int[][] matrix;
+        private final int value;
+        private final int maxSize;
+        private final int[][] matrix;
         private static final URL inputFilePath = TerritoryData.class.getResource("territoryData.txt");
 
         public TerritoryData(int value, int maxSize, int[][] matrix) {
@@ -80,6 +48,7 @@ public class TerritorySize {
             List<TerritoryData> dataList = new ArrayList<>();
             try {
                 // System.out.println("Input file path is " + inputFilePath);
+                // ToDo: Move to Utility class?
                 Scanner fileReader = new Scanner(new File(inputFilePath.toURI()));
                 // ToDo: Test whether this can read multiple data sets
                 while (fileReader.hasNextLine()) {
@@ -118,10 +87,10 @@ public class TerritorySize {
     }
 
     static class Territory {
-        static int ID = 1;   // Mainly for debugging purposes
+        static int ID = 1;  // Mainly added for debugging
+        String name;        // Mainly added for debugging
         Integer value;
         int size;
-        String name;  // Mainly added for debugging
         HashMap<Integer, TreeSet<Integer>> indexes;
 
         public Territory(int newValue, int i, int j) {
@@ -151,15 +120,22 @@ public class TerritorySize {
             return indexes != null && indexes.containsKey(i) && indexes.get(i).contains(j);
         }
 
+        public void addIndexes(int row, Set<Integer> columns) {
+            for (int col : columns) {
+                addIndex(row, col);
+            }
+        }
+
         // ToDo: Only ever going to be adding the current row to a territory for the previous row (can simplify?)
-        // public void addIndexes(int row, int[] columns)
-        // public void addIndexes(Territory t)
         public void mergeWith(Territory t) {
-            // ToDo: Null check for t
-            if (t.getValue() != value) {
-                System.out.println("WARNING MERGING TERRITORIES WITH DIFFERENT VALUES!");
+            if (t == null) {
+                System.out.println("ERROR: ATTEMPTING TO MERGE WITH NULL TERRITORY!");
+            }
+            else if (t.getValue() != value) {
+                System.out.println("ERROR: CANNOT MERGE TERRITORIES WITH DIFFERENT VALUES!");
                 System.out.println("  Territory " + t.getName() + " has value " + t.getValue());
                 System.out.println("  Territory " + name + " has value " + value);
+                return;
             }
             for (Map.Entry<Integer, TreeSet<Integer>> row : t.getEntries()) {
                 for (Integer col : row.getValue()) {
@@ -170,71 +146,127 @@ public class TerritorySize {
         }
     }
 
-    public static Territory calculateTerritory(TerritoryData data) {
-        Territory maxT = null;
-        // Use this in recursion to mark checked indexes?
-        HashMap<String, Territory> indexToTerritory = new HashMap<>();
-        Scanner reader = new Scanner(System.in); // ToDo: Move to utility class (pauseForStdin())
+    static class TerritoryMap {
+        final int[][] territoryMatrix;
+        Territory tMax;    // Largest territory found
+        // ToDo: Can this be a Territory matrix?
+        Map<String, Territory> territoryLookup;   // Maps a matrix index to a Territory
 
-        for (int i = 0; i < data.matrix.length; i++) {
-            for (int j = 0; j < data.matrix[i].length; j++) {
-                // Rename to prevRow, prevCol? lastRow, lastCol?
-                Territory newTerritory = null, tRow = indexToTerritory.get((i - 1) + "," + j),
-                        tCol = indexToTerritory.get(i + "," + (j - 1));
-                if (tCol != null && tCol.getValue() == data.matrix[i][j]) {
-                    System.out.println("Adding column index at (" + i + "," + j + ") for value " + tCol.getValue());
-                    tCol.addIndex(i, j);
-                    newTerritory = tCol;
-                }
-                if (tRow != null && tRow.getValue() == data.matrix[i][j]) {
-                    if (newTerritory == null) {
-                        tRow.addIndex(i, j);
-                    }
-                    // This means that value at (i,j) is part of larger column territory which hasn't
-                    // already been merged with the row territory above it
-                    else if (tRow != tCol) {
-                        System.out.println("Merging territory at index (" + i + "," + j + ") for value " + tRow.getValue());
-                        tRow.mergeWith(newTerritory);
+        public TerritoryMap(int[][] matrix) { this.territoryMatrix = matrix; }
 
-                        // Update territory map
-                        if (tCol.getValue() == data.matrix[i][j]) {
-                            for (int c : tCol.getRow(i)) {
-                                System.out.println("Adding entry for territory " + tRow.getName() + " at index (" + i + "," + c + ")");
-                                indexToTerritory.put(i + "," + c, tRow);
-                            }
-                        }
+        // Check the Territory at index (i, j) to see if there is a matching value at an adjacent index
+        Territory checkAdjacentTerritory(int i, int j, Position p) {
+            Territory t = territoryLookup.get(p.getLookupIndex(i, j));
+            return t != null && t.getValue() == territoryMatrix[i][j] ? t : null;
+        }
+
+        /*
+        ** This is the heart of the algorithm. Check the previous row and the previous column
+        ** to see if there is a matching territory.
+        */
+        Territory addToTerritory(int i, int j) {
+            // ToDo: Change name to previousCol? lastRow, lastColumn?
+            Territory previousRow = checkAdjacentTerritory(i, j, Position.LAST_ROW),
+                    previousColumn = checkAdjacentTerritory(i, j, Position.LAST_COL);
+            if (previousColumn != null) {
+                previousColumn.addIndex(i, j);
+            }
+            if (previousRow != null) {
+                if (previousColumn == null) {
+                    previousRow.addIndex(i, j);
+                }
+                else if (previousRow != previousColumn) {
+                    System.out.println("Merging territory at index (" + i + "," + j + ") for value "
+                            + previousRow.getValue());
+                    previousRow.addIndexes(i, previousColumn.getRow(i));
+                    // Update territory lookup map
+                    for (int n : previousColumn.getRow(i)) {
+                        territoryLookup.put(i + "," + n, previousRow);
                     }
-                    newTerritory = tRow;
                 }
-                if (newTerritory == null) {
-                    newTerritory = new Territory(data.matrix[i][j], i, j);
-                }
-                if (maxT == null || newTerritory.getSize() > maxT.getSize()) {
-                    System.out.println("Setting max size to " + newTerritory.getSize());
-                    maxT = newTerritory;
-                }
-                indexToTerritory.put(i + "," + j, newTerritory);
-                // reader.nextLine();  // For debugging
+            }
+            // Order matters here - must test previousRow first
+            Territory territoryToAdd = previousRow != null ? previousRow :
+                    previousColumn != null ? previousColumn : new Territory(territoryMatrix[i][j], i, j);
+            territoryLookup.put(i + "," + j, territoryToAdd);
+            return territoryToAdd;
+        }
+
+        void updateMaxTerritory(Territory t) {
+            if (t == tMax) {
+                System.out.println(t.getName() + ": Updated max territory size to " + t.getSize()
+                        + " for value " + t.getValue());
+            }
+            else if (tMax == null || tMax.getSize() < t.getSize()) {
+                System.out.println(t.getName() + ": Setting max territory size to " + t.getSize()
+                        + " for value " + t.getValue());
+                tMax = t;
             }
         }
-        return maxT;
+
+        void resetData() {
+            territoryLookup = new HashMap<>();
+            tMax = null;
+        }
+
+        public Territory calculateTerritoryRecursive() {
+            resetData();
+            calculateTerritoryRecursive(0, 0);
+            return tMax;
+        }
+
+        // At least in this case recursion is just a more complicated way of looping
+        private void calculateTerritoryRecursive(int i, int j) {
+            Territory territoryToAdd = addToTerritory(i, j);
+            updateMaxTerritory(territoryToAdd);
+            // This essentially turns the recursion into a "loop"
+            if (j != territoryMatrix[0].length - 1) {
+                calculateTerritoryRecursive(i , j + 1);
+            }
+            else if (i != territoryMatrix.length - 1) {
+                calculateTerritoryRecursive(i + 1, 0);
+            }
+        }
+
+        public Territory calculateTerritory() {
+            resetData();
+            for (int i = 0; i < territoryMatrix.length; i++) {
+                for (int j = 0; j < territoryMatrix[i].length; j++) {
+                    Territory territoryToAdd = addToTerritory(i, j);
+                    updateMaxTerritory(territoryToAdd);
+                }
+            }
+            return tMax;
+        }
+    }
+
+    public static void checkResult(Territory largestTerritory, TerritoryData data) {
+        if (largestTerritory != null) {
+            System.out.println("Maximum territory is " + largestTerritory.getSize() + " for value "
+                    + largestTerritory.getValue());
+            assertEquals("Largest territory size", data.getMaxSize(), largestTerritory.getSize());
+            assertEquals("Largest territory value", data.getValue(), largestTerritory.getValue());
+        }
     }
 
     public static void main(String[] args) {
         int[][] matrix1 = {{1, 2, 3},
                            {1, 1, 3},
                            {1, 1, 1}};
-        // calculateLargestTerritory(new TerritoryData(1, 6, matrix1));
-        // calculateLargestTerritory(matrix1);
         // ToDo: Update this to read multiple data sets
         List<TerritoryData> territoryDataList = TerritoryData.readTerritoryData();
+        territoryDataList.add(new TerritoryData(1, 6, matrix1));
         for (TerritoryData data : territoryDataList) {
-            System.out.println(data);
-            Territory largestTerritory = calculateTerritory(data);
-            if (largestTerritory != null) {
-                System.out.println("Maximum territory is " + largestTerritory.getSize() + " for value "
-                        + largestTerritory.getValue());
-            }
+            TerritoryMap testDriver = new TerritoryMap(data.getMatrix());
+            // System.out.println(data);
+
+            System.out.println("\nDoing non-recursive test");
+            Territory largestTerritory = testDriver.calculateTerritory();
+            checkResult(largestTerritory, data);
+
+            System.out.println("\nDoing recursive test");
+            largestTerritory = testDriver.calculateTerritoryRecursive();
+            checkResult(largestTerritory, data);
         }
     }
 }
